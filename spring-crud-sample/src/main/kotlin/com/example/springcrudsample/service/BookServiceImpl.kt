@@ -3,11 +3,22 @@ package com.example.springcrudsample.service
 import com.example.springcrudsample.model.Book
 import com.example.springcrudsample.repository.BookRepository
 import org.springframework.stereotype.Service
+import org.springframework.util.Assert
 import java.util.*
 
 @Service
 class BookServiceImpl(private val repository: BookRepository): BookService {
-    override fun create(book: Book): Book = repository.save(book)
+    override fun create(book: Book): Book {
+        Assert.hasLength(book.title, "[title] cant be empty")
+        Assert.hasLength(book.author, "[author] cant be empty")
+
+        Assert.isTrue(book.title.length > 1, "[title] must have more than one char")
+        Assert.isTrue(book.author.length > 1, "[author] must have more than one char")
+
+        Assert.isTrue(book.publishedAt.toString().length == 4, "[year] invalid year")
+
+        return repository.save(book)
+    }
 
     override fun getAll(): List<Book> = repository.findAll()
 

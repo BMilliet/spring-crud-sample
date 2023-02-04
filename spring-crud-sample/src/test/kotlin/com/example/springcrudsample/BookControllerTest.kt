@@ -68,6 +68,84 @@ class BookControllerTest {
     }
 
     @Test
+    fun `test fail to create book with invalid title`() {
+        bookRepository.deleteAll()
+        val book = bookRepository.save(Book(title = "", author = "Fyodor Dostoevsky", publishedAt = 1880))
+        val bookJSON = ObjectMapper().writeValueAsString(book)
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/books")
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(bookJSON))
+            .andExpect(MockMvcResultMatchers.status().isBadRequest)
+            .andExpect(MockMvcResultMatchers.jsonPath("\$.statusCode").value(400))
+            .andExpect(MockMvcResultMatchers.jsonPath("\$.message").value("[title] cant be empty"))
+
+        val book1 = bookRepository.save(Book(title = "T", author = "Fyodor Dostoevsky", publishedAt = 1880))
+        val bookJSON1 = ObjectMapper().writeValueAsString(book1)
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/books")
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(bookJSON1))
+            .andExpect(MockMvcResultMatchers.status().isBadRequest)
+            .andExpect(MockMvcResultMatchers.jsonPath("\$.statusCode").value(400))
+            .andExpect(MockMvcResultMatchers.jsonPath("\$.message").value("[title] must have more than one char"))
+    }
+
+    @Test
+    fun `test fail to create book with empty author`() {
+        bookRepository.deleteAll()
+        val book = bookRepository.save(Book(title = "The Brothers Karamazov", author = "", publishedAt = 1880))
+        val bookJSON = ObjectMapper().writeValueAsString(book)
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/books")
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(bookJSON))
+            .andExpect(MockMvcResultMatchers.status().isBadRequest)
+            .andExpect(MockMvcResultMatchers.jsonPath("\$.statusCode").value(400))
+            .andExpect(MockMvcResultMatchers.jsonPath("\$.message").value("[author] cant be empty"))
+
+        val book1 = bookRepository.save(Book(title = "The Brothers Karamazov", author = "F", publishedAt = 1880))
+        val bookJSON1 = ObjectMapper().writeValueAsString(book1)
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/books")
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(bookJSON1))
+            .andExpect(MockMvcResultMatchers.status().isBadRequest)
+            .andExpect(MockMvcResultMatchers.jsonPath("\$.statusCode").value(400))
+            .andExpect(MockMvcResultMatchers.jsonPath("\$.message").value("[author] must have more than one char"))
+    }
+
+    @Test
+    fun `test fail to create book with invalid year`() {
+        bookRepository.deleteAll()
+        val book = bookRepository.save(Book(title = "The Brothers Karamazov", author = "Fyodor Dostoevsky", publishedAt = 11880))
+        val bookJSON = ObjectMapper().writeValueAsString(book)
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/books")
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(bookJSON))
+            .andExpect(MockMvcResultMatchers.status().isBadRequest)
+            .andExpect(MockMvcResultMatchers.jsonPath("\$.statusCode").value(400))
+            .andExpect(MockMvcResultMatchers.jsonPath("\$.message").value("[year] invalid year"))
+
+        val book1 = bookRepository.save(Book(title = "The Brothers Karamazov", author = "Fyodor Dostoevsky", publishedAt = 188))
+        val bookJSON1 = ObjectMapper().writeValueAsString(book1)
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/books")
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(bookJSON1))
+            .andExpect(MockMvcResultMatchers.status().isBadRequest)
+            .andExpect(MockMvcResultMatchers.jsonPath("\$.statusCode").value(400))
+            .andExpect(MockMvcResultMatchers.jsonPath("\$.message").value("[year] invalid year"))
+    }
+
+    @Test
     fun `test update book`() {
         bookRepository.deleteAll()
         val book = bookRepository
